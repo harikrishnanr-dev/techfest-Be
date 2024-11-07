@@ -26,7 +26,7 @@ const createEvent = async (req, res) => {
       return res.status(400).json({ message: 'Event poster is required.' });
     }
 
-    // Create a new event document with the uploaded poster URL
+    // Create a new event document with the uploaded poster path
     const event = new Event({
       eventName,
       eventDescription,
@@ -35,7 +35,7 @@ const createEvent = async (req, res) => {
       eventDate,
       eventTime,
       eventVenue,
-      posterUrl: `/uploads/event-posters/${poster.filename}`  // Save the relative path of the uploaded image
+      posterPath: `${poster.filename}`  // Save the relative path of the uploaded image
     });
 
     await event.save();

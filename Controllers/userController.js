@@ -6,11 +6,11 @@ exports.register = async (req, res) => {
     console.log("Inside User Register Controller");
 
     // Destructure the required fields from the request body
-    const { username, email, password } = req.body;
+    const { email, password, firstname, lastname, college, batch, year, phonenumber } = req.body;
 
     // Input validation
-    if (!username || !email || !password) {
-        return res.status(400).json({ message: "Username, email, and password are required." });
+    if ( !email || !password || !firstname || !lastname || !college || !batch || !year || !phonenumber) {
+        return res.status(400).json({ message: "All fields are required." });
     }
 
     try {
@@ -24,28 +24,27 @@ exports.register = async (req, res) => {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // Create a new user with the hashed password
+        // Create a new user with the hashed password and other details
         const newUser = new User({
-            username,
             email,
             password: hashedPassword,
             profile: "", // Default profile value
+            firstname,
+            lastname,
+            college,
+            batch,
+            year,
+            phonenumber
         });
 
         // Save the new user to the database
         await newUser.save();
         res.status(201).json({ message: "Account Created Successfully" });
-        userId: newUser._id;
-        console.log(newUser._id)
+
+        // Log the new user's ID for debugging
+        console.log("New User ID:", newUser._id);
     } catch (error) {
         console.error("Error during registration:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
-};
-
-// Get user details (optional, if needed)
-exports.getUserDetails = async (req, res) => {
-    console.log("Inside User Details Controller");
-    // Implement logic to retrieve user details if needed
-    res.status(200).json({ message: "Get User Details" });
 };

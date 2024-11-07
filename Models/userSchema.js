@@ -2,11 +2,6 @@ const mongoose = require('mongoose');
 
 // Create user schema
 const userSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true // Ensure usernames are unique
-    },
     email: {
         type: String,
         required: true,
@@ -19,11 +14,36 @@ const userSchema = new mongoose.Schema({
     profile: {
         type: String,
         default: "" // Default profile value
+    },
+    firstname: {
+        type: String,
+        required: true // Ensure first name is provided
+    },
+    lastname: {
+        type: String,
+        required: true // Ensure last name is provided
+    },
+    college: {
+        type: String,
+        required: true // Ensure college name is provided
+    },
+    batch: {
+        type: String,
+        required: true // Ensure batch is provided
+    },
+    year: {
+        type: String,
+        required: true // Ensure year is provided
+    },
+    phonenumber: {
+        type: String,
+        required: true, // Ensure phone number is provided
+        unique: true // Ensure phone numbers are unique
     }
 });
 
 // Create model
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model("users", userSchema);
 
 // Export the model
 module.exports = User;
