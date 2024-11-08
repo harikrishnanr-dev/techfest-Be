@@ -1,50 +1,82 @@
-const bcrypt = require('bcrypt');
-const User = require('../Models/userSchema');
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const users = require("../Models/userSchema");
 
 // Register user
 exports.register = async (req, res) => {
-    console.log("Inside User Register Controller");
-
-    // Destructure the required fields from the request body
-    const { email, password, firstname, lastname, college, batch, year, phonenumber } = req.body;
+    // store the user details to DB
+    console.log("Inside User Register");
+    const { firstname,lastname,phonenumber,email, password,college,batch,year} = req.body;
 
     // Input validation
-    if ( !email || !password || !firstname || !lastname || !college || !batch || !year || !phonenumber) {
-        return res.status(400).json({ message: "All fields are required." });
+    if (!email || !password) {
+        return res.status(400).json("Email and password are required");
     }
 
     try {
-        // Check if the user already exists based on email
-        const existingUser = await User.findOne({ email });
+        // Check if the user already exists
+        const existingUser = await users.findOne({ email: email });
         if (existingUser) {
-            return res.status(400).json({ message: "Account Already Exists" });
+            return res.status(400).json("Account already exists");
+        } else {
+            console.log("User does not exist");
+
+            // Hash the password before saving it
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Create new user
+            const newUser = new users({
+                firstname: firstname,
+                lastname: lastname,
+                email: email,
+                phonenumber:phonenumber,
+                password: hashedPassword,  // Save hashed password
+                college: college,
+                batch: batch,
+                year: year,
+                profile: "",
+            });
+
+            await newUser.save();
+            res.status(201).json("User registered successfully");
+        }
+    } catch (err) {
+        console.error("Error during registration:", err);
+        res.status(500).json({ message: "Register request failed", error: err.message });
+    }
+};
+
+//login
+exports.login = async (req, res) => {
+    console.log("Inside Login Controller");
+    const { email, password } = req.body;
+
+    try {
+        // Find the user by email
+        const existingUser = await users.findOne({ email: email });
+
+        if (!existingUser) {
+            return res.status(401).json("Invalid Email or Password");
         }
 
-        // Hash the password
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        // Compare the hashed password with the provided password
+        const isMatch = await bcrypt.compare(password, existingUser.password);
 
-        // Create a new user with the hashed password and other details
-        const newUser = new User({
-            email,
-            password: hashedPassword,
-            profile: "", // Default profile value
-            firstname,
-            lastname,
-            college,
-            batch,
-            year,
-            phonenumber
+        if (!isMatch) {
+            return res.status(401).json("Invalid Email or Password");
+        }
+
+        // Generate JWT token after successful login
+        const token = jwt.sign({ userId: existingUser._id }, "userpwd123", { expiresIn: "1h" });
+
+        console.log(token);
+
+        res.status(200).json({
+            data: existingUser,
+            token: token,
         });
-
-        // Save the new user to the database
-        await newUser.save();
-        res.status(201).json({ message: "Account Created Successfully" });
-
-        // Log the new user's ID for debugging
-        console.log("New User ID:", newUser._id);
     } catch (error) {
-        console.error("Error during registration:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+        console.error("Error during login:", error);
+        res.status(500).json("Internal Server Error");
     }
 };

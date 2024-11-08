@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Create user schema
+// Create user schema without username field
 const userSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Create model
-const User = mongoose.model("users", userSchema);
+const users = mongoose.model("users", userSchema);
 
 // Export the model
-module.exports = User;
+module.exports = users;

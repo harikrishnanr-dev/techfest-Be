@@ -3,7 +3,6 @@
 require('dotenv').config()
 //import express  cors module etc..
 const express = require('express')
-
 require('./DB/connection')
 const cors = require('cors')
 const router=require('./Router/router')
@@ -13,7 +12,8 @@ const tfServer = express()
 tfServer.use(cors())
 //middleware to covert json to object
 tfServer.use(express.json())
- tfServer.use(router)
+console.log('hi')
+tfServer.use(router)
 //provide port
 const PORT = 4000;
 
